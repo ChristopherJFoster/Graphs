@@ -133,7 +133,6 @@ class Graph:
         starting_vertex to destination_vertex in
         breath-first order.
         """
-
         try:
             self.vertices[starting_vertex]
             self.vertices[destination_vertex]
@@ -170,7 +169,28 @@ class Graph:
         starting_vertex to destination_vertex in
         depth-first order.
         """
-        pass  # TODO
+        try:
+            self.vertices[starting_vertex]
+            self.vertices[destination_vertex]
+        except KeyError:
+            return f'At least one of the vertices you supplied ({starting_vertex}, {destination_vertex}) does not exist in the graph.'
+
+        path = []
+        visited = {i: 'white' for i in self.vertices}
+
+        def recurse(vertex):
+            visited[vertex] = 'grey'
+            unvisited = self.vertices[vertex] - \
+                set(k for k, v in visited.items() if v != 'white')
+            for i in unvisited:
+                recurse(i)
+            visited[vertex] = 'black'
+            # A vertex is not added to the path unless it's part of the path that leads to the destination vertex.
+            if visited[destination_vertex] != 'white':
+                path.insert(0, vertex)
+
+        recurse(starting_vertex)
+        return path
 
 
 if __name__ == '__main__':
@@ -239,11 +259,11 @@ if __name__ == '__main__':
     Valid BFS path:
         [1, 2, 4, 6]
     '''
-    print('BFS: ', graph.bfs(1, 60))
+    print('BFS: ', graph.bfs(1, 6))
 
     '''
     Valid DFS paths:
         [1, 2, 4, 6]
         [1, 2, 4, 7, 6]
     '''
-    # print('DFS: ', graph.dfs(1, 6))
+    print('DFS: ', graph.dfs(1, 6))
