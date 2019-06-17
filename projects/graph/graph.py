@@ -14,7 +14,7 @@ class Graph:
         """
         Add a vertex to the graph.
         """
-        self.vertices.update({vertex: set()})
+        self.vertices[vertex] = set()
 
     def add_edge(self, v1, v2):
         """
@@ -100,7 +100,32 @@ class Graph:
         beginning from starting_vertex.
         This should be done using recursion.
         """
-        pass  # TODO
+        # Check for a valid starting vertex
+        try:
+            self.vertices[starting_vertex]
+        except KeyError:
+            return f'The starting vertex you supplied ({starting_vertex}) does not exist in the graph.'
+        # Set up traversal record and color record for visited vertices
+        traversal = []
+        visited = {i: 'white' for i in self.vertices}
+
+        # Recursive function nested within main function
+        def recurse(vertex):
+            # Color each visited vertex grey
+            visited[vertex] = 'grey'
+            # Determine unvisited neighbors
+            unvisited = self.vertices[vertex] - \
+                set(k for k, v in visited.items() if v != 'white')
+            # Call this function on each unvisited neighbor
+            for i in unvisited:
+                recurse(i)
+            # Once all neighbors have been visited, color vertex black and add it to the front of the traversal record (see explanation in DFT, above)
+            visited[vertex] = 'black'
+            traversal.insert(0, vertex)
+        # Start the recursion with the starting vertex
+        recurse(starting_vertex)
+        # Return the traversal record
+        return traversal
 
     def bfs(self, starting_vertex, destination_vertex):
         """
@@ -179,7 +204,7 @@ if __name__ == '__main__':
         1, 2, 4, 7, 6, 3, 5
         1, 2, 4, 6, 3, 5, 7
     '''
-    # print('DFT (recursive): ', graph.dft_recursive(1))
+    print('DFT (recursive): ', graph.dft_recursive(1))
 
     '''
     Valid BFS path:
