@@ -133,7 +133,36 @@ class Graph:
         starting_vertex to destination_vertex in
         breath-first order.
         """
-        pass  # TODO
+
+        try:
+            self.vertices[starting_vertex]
+            self.vertices[destination_vertex]
+        except KeyError:
+            return f'At least one of the vertices you supplied ({starting_vertex}, {destination_vertex}) does not exist in the graph.'
+
+        # Since full paths are stored in the queue, no separate traversal record is needed.
+        q = Queue()
+        visited = {i: 'white' for i in self.vertices}
+
+        q.enqueue([starting_vertex])
+        visited[starting_vertex] = 'grey'
+
+        while q.size() > 0:
+            # This time, unvisited = the set of valid neighbors _of the last vertex in first path in the queue_ minus the set of already visited vertices
+            unvisited = self.vertices[
+                q.queue[0][len(q.queue[0]) - 1]] - set(k for k, v in visited.items() if v != 'white')
+            for i in unvisited:
+                # (I think) we need to make a deep copy (copy by value) of the path in order to append each new vertex to their own copy of the path.
+                path_copy = list(map(lambda i: i, q.queue[0]))
+                path_copy.append(i)
+                # As soon as the destination vertex is found, the path is returned:
+                if i == destination_vertex:
+                    return path_copy
+                # Otherwise, the new (longer) path is added to the queue to check for a connection to the destination vertex
+                q.enqueue(path_copy)
+                visited[i] = 'grey'
+            visited[q.queue[0][len(q.queue[0]) - 1]] = 'black'
+            q.dequeue()
 
     def dfs(self, starting_vertex, destination_vertex):
         """
@@ -210,7 +239,7 @@ if __name__ == '__main__':
     Valid BFS path:
         [1, 2, 4, 6]
     '''
-    # print('BFS: ', graph.bfs(1, 6))
+    print('BFS: ', graph.bfs(1, 60))
 
     '''
     Valid DFS paths:
