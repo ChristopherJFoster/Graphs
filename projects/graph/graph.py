@@ -14,15 +14,15 @@ class Graph:
         """
         Add a vertex to the graph.
         """
-        self.vertices.update({f'{vertex}': set()})
+        self.vertices.update({vertex: set()})
 
     def add_edge(self, v1, v2):
         """
         Add a directed edge to the graph.
         """
         try:
-            self.vertices[str(v2)]
-            self.vertices[str(v1)].add(v2)
+            self.vertices[v2]
+            self.vertices[v1].add(v2)
         except KeyError:
             print(
                 f'At least one of the vertices you supplied ({v1}, {v2}) does not exist in the graph.')
@@ -32,7 +32,30 @@ class Graph:
         Print each vertex in breadth-first order
         beginning from starting_vertex.
         """
-        pass  # TODO
+
+        try:
+            self.vertices[starting_vertex]
+        except KeyError:
+            return f'The vertex you supplied ({starting_vertex}) does not exist in the graph.'
+
+        traversal = []
+        q = Queue()
+        visited = {i: 'white' for i in self.vertices}
+
+        q.enqueue(starting_vertex)
+        visited[starting_vertex] = 'grey'
+
+        while q.size() > 0:
+            unvisited = self.vertices[
+                q.queue[0]] - set(k for k, v in visited.items() if v != 'white')
+            if len(unvisited) > 0:
+                for i in unvisited:
+                    q.enqueue(i)
+                    visited[i] = 'grey'
+            traversal.append(q.queue[0])
+            visited[q.dequeue()] = 'black'
+
+        return traversal
 
     def dft(self, starting_vertex):
         """
@@ -91,7 +114,7 @@ if __name__ == '__main__':
     Should print:
         {1: {2}, 2: {3, 4}, 3: {5}, 4: {6, 7}, 5: {3}, 6: {3}, 7: {1, 6}}
     '''
-    print(graph.vertices)
+    print('Vertices and edges: ', graph.vertices)
 
     '''
     Valid DFT paths:
@@ -100,7 +123,7 @@ if __name__ == '__main__':
         1, 2, 4, 7, 6, 3, 5
         1, 2, 4, 6, 3, 5, 7
     '''
-    # graph.dft(1)
+    # print('DFT: ', graph.dft(1))
 
     '''
     Valid BFT paths:
@@ -117,7 +140,7 @@ if __name__ == '__main__':
         1, 2, 4, 3, 7, 6, 5
         1, 2, 4, 3, 7, 5, 6
     '''
-    # graph.bft(1)
+    print('BFT: ', graph.bft(1))
 
     '''
     Valid DFT recursive paths:
@@ -126,17 +149,17 @@ if __name__ == '__main__':
         1, 2, 4, 7, 6, 3, 5
         1, 2, 4, 6, 3, 5, 7
     '''
-    # graph.dft_recursive(1)
+    # print('DFT (recursive): ', graph.dft_recursive(1))
 
     '''
     Valid BFS path:
         [1, 2, 4, 6]
     '''
-    # print(graph.bfs(1, 6))
+    # print('BFS: ', graph.bfs(1, 6))
 
     '''
     Valid DFS paths:
         [1, 2, 4, 6]
         [1, 2, 4, 7, 6]
     '''
-    # print(graph.dfs(1, 6))
+    # print('DFS: ', graph.dfs(1, 6))
