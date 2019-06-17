@@ -20,7 +20,12 @@ class Graph:
         """
         Add a directed edge to the graph.
         """
-        self.vertices[str(v1)].add(v2)
+        try:
+            self.vertices[str(v2)]
+            self.vertices[str(v1)].add(v2)
+        except KeyError:
+            print(
+                f'At least one of the vertices you supplied ({v1}, {v2}) does not exist in the graph.')
 
     def bft(self, starting_vertex):
         """
