@@ -59,6 +59,8 @@ class Graph:
         # Return the traversal record
         return traversal
 
+    # def bft_brady(self, starting_vertex):
+
     def dft(self, starting_vertex):
         """
         Print each vertex in depth-first order
@@ -127,6 +129,24 @@ class Graph:
         # Return the traversal record
         return traversal
 
+    def dft_recursive_brady(self, starting_vertex, visited=None):
+        """
+        Print each vertex in depth-first order
+        beginning from starting_vertex.
+        This should be done using recursion.
+        """
+        if visited == None:
+            visited = set()
+        # If the node hasn't been visited
+        if starting_vertex not in visited:
+            # Mark the node as visited
+            print(starting_vertex)
+            visited.add(starting_vertex)
+            for neighbor in self.vertices[starting_vertex]:
+                self.dft_recursive_brady(neighbor, visited)
+
+        # Then call dft_recursive_brady on each child
+
     def bfs(self, starting_vertex, destination_vertex):
         """
         Return a list containing the shortest path from
@@ -163,6 +183,39 @@ class Graph:
             visited[q.queue[0][len(q.queue[0]) - 1]] = 'black'
             q.dequeue()
 
+    def bfs_brady(self, starting_vertex, destination_vertex):
+        """
+        Return a list containing the shortest path from
+        starting_vertex to destination_vertex in
+        breath-first order.
+        """
+        # Create an empty set to store visited nodes
+        visited = set()
+        # Create an empty Queue and enqueue A PATH TO the starting vertex
+        q = Queue()
+        q.enqueue([starting_vertex])
+        # While the queue is not empty...
+        while q.size() > 0:
+            # Dequeue the first PATH
+            path = q.dequeue()
+            # GRAB THE VERTEX FROM THE END OF THE PATH
+            v = path[-1]
+            # IF VERTEX == TARGET, RETURN PATH
+            if v == destination_vertex:
+                return path
+            # If that vertex has not been visited...
+            if v not in visited:
+                # Mark it as visited
+                visited.add(v)
+                # Then add A PATH TO all of its neighbors to the back of the queue
+                for neighbor in self.vertices[v]:
+                    # Copy the path
+                    path_copy = list(path)
+                    # Append neighbor to the back of the copy
+                    path_copy.append(neighbor)
+                    # Enqueue copy
+                    q.enqueue(path_copy)
+
     def dfs(self, starting_vertex, destination_vertex):
         """
         Return a list containing a path from
@@ -193,6 +246,34 @@ class Graph:
 
         recurse(starting_vertex)
         return path
+
+    def dfs_brady(self, starting_vertex, destination_vertex):
+        # Create an empty set to store visited nodes
+        visited = set()
+        # Create an empty Stack and push A PATH TO the starting vertex
+        s = Stack()
+        s.push([starting_vertex])
+        # While the stack is not empty...
+        while s.size() > 0:
+            # Pop the first PATH
+            path = s.pop()
+            # GRAB THE VERTEX FROM THE END OF THE PATH
+            v = path[-1]
+            # IF VERTEX == TARGET, RETURN PATH
+            if v == destination_vertex:
+                return path
+            # If that vertex has not been visited...
+            if v not in visited:
+                # Mark it as visited
+                visited.add(v)
+                # Then add A PATH TO all of its neighbors to the top of the stack
+                for neighbor in self.vertices[v]:
+                    # Copy the path
+                    path_copy = list(path)
+                    # Append neighbor to the back of the copy
+                    path_copy.append(neighbor)
+                    # Enqueue copy
+                    s.push(path_copy)
 
 
 if __name__ == '__main__':
@@ -229,7 +310,7 @@ if __name__ == '__main__':
     Should print:
         {1: {2}, 2: {3, 4}, 3: {5}, 4: {6, 7}, 5: {3}, 6: {3}, 7: {1, 6}}
     '''
-    print('Vertices and edges: ', graph.vertices)
+    print('vertices and edges: ', graph.vertices)
 
     '''
     Valid BFT paths:
@@ -246,7 +327,7 @@ if __name__ == '__main__':
         1, 2, 4, 3, 7, 6, 5
         1, 2, 4, 3, 7, 5, 6
     '''
-    print('BFT: ', graph.bft(1))
+    print('bft: ', graph.bft(1))
 
     '''
     Valid DFT paths:
@@ -255,7 +336,7 @@ if __name__ == '__main__':
         1, 2, 4, 7, 6, 3, 5
         1, 2, 4, 6, 3, 5, 7
     '''
-    print('DFT: ', graph.dft(1))
+    print('dft: ', graph.dft(1))
 
     '''
     Valid DFT recursive paths:
@@ -264,17 +345,20 @@ if __name__ == '__main__':
         1, 2, 4, 7, 6, 3, 5
         1, 2, 4, 6, 3, 5, 7
     '''
-    print('DFT (recursive): ', graph.dft_recursive(1))
+    print('dft_recursive:       ', graph.dft_recursive(1))
+    print('dft_recursive_brady: ', graph.dft_recursive(1))
 
     '''
     Valid BFS path:
         [1, 2, 4, 6]
     '''
-    print('BFS: ', graph.bfs(1, 6))
+    print('bfs:       ', graph.bfs(1, 6))
+    print('bfs_brady: ', graph.bfs_brady(1, 6))
 
     '''
     Valid DFS paths:
         [1, 2, 4, 6]
         [1, 2, 4, 7, 6]
     '''
-    print('DFS: ', graph.dfs(1, 6))
+    print('dfs:       ', graph.dfs(1, 6))
+    print('dfs_brady: ', graph.dfs(1, 6))
