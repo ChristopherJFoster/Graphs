@@ -179,14 +179,16 @@ class Graph:
         visited = {i: 'white' for i in self.vertices}
 
         def recurse(vertex):
-            visited[vertex] = 'grey'
-            unvisited = self.vertices[vertex] - \
-                set(k for k, v in visited.items() if v != 'white')
-            for i in unvisited:
-                recurse(i)
-            visited[vertex] = 'black'
+            # Once the destination vertex is found, don't visit any new vertices (i.e., don't color them grey).
+            if visited[destination_vertex] == 'white':
+                visited[vertex] = 'grey'
+                unvisited = self.vertices[vertex] - \
+                    set(k for k, v in visited.items() if v != 'white')
+                for i in unvisited:
+                    recurse(i)
+                visited[vertex] = 'black'
             # A vertex is not added to the path unless it's part of the path that leads to the destination vertex.
-            if visited[destination_vertex] != 'white':
+            if visited[destination_vertex] != 'white' and visited[vertex] != 'white':
                 path.insert(0, vertex)
 
         recurse(starting_vertex)
@@ -203,6 +205,11 @@ if __name__ == '__main__':
     graph.add_vertex(5)
     graph.add_vertex(6)
     graph.add_vertex(7)
+    # Adding these vertices (and the edges below) caused my previous implementation of DFS to fail (DFS is working now).
+    graph.add_vertex(8)
+    graph.add_vertex(9)
+    graph.add_vertex(10)
+
     graph.add_edge(5, 3)
     graph.add_edge(6, 3)
     graph.add_edge(7, 1)
@@ -213,6 +220,10 @@ if __name__ == '__main__':
     graph.add_edge(3, 5)
     graph.add_edge(2, 3)
     graph.add_edge(4, 6)
+    # Adding these edges (and the vertices above) caused my previous implementation of DFS to fail (DFS is working now).
+    graph.add_edge(1, 8)
+    graph.add_edge(1, 9)
+    graph.add_edge(1, 10)
 
     '''
     Should print:
