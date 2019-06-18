@@ -14,7 +14,6 @@ def earliest_ancestor(data, id, ancs=None):
                 ancs[0]) else ancs.append(lineage)
             # Recursively call earliest_ancestor on the new ancestor
             earliest_ancestor(data, data[i][0], ancs)
-
     # Return the earliest ancestor from ancs (the ancestor represented by the longest list). Return lowest id if tied. If len(ancs) is not greater than 1, that means the provided id has no parents: return -1. The following code takes advantage of the fact that ancs is partially sorted such that the earliest ancestor (or one which is tied) is in the front of ancs.
     return min([x[-1] for x in ancs if len(
         x) == len(ancs[0])]) if len(ancs) > 1 else -1
