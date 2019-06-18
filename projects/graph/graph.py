@@ -247,6 +247,30 @@ class Graph:
         recurse(starting_vertex)
         return path
 
+    # dfs() is already recursive, but I nested the recursive function in the larger function. Here I refactored so it passes path and visited along instead of relying on path and visited being outside of the recursive function.
+    def dfs_recursive(self, starting_vertex, destination_vertex, path=None, visited=None):
+        try:
+            self.vertices[starting_vertex]
+            self.vertices[destination_vertex]
+        except KeyError:
+            return f'At least one of the vertices you supplied ({starting_vertex}, {destination_vertex}) does not exist in the graph.'
+
+        if path == None:
+            path = []
+        if visited == None:
+            visited = {i: 'white' for i in self.vertices}
+
+        if visited[destination_vertex] == 'white':
+            visited[starting_vertex] = 'grey'
+            unvisited = self.vertices[starting_vertex] - \
+                set(k for k, v in visited.items() if v != 'white')
+            for i in unvisited:
+                self.dfs_recursive(i, destination_vertex, path, visited)
+            visited[starting_vertex] = 'black'
+        # A vertex is not added to the path unless it's part of the path that leads to the destination vertex.
+        if visited[destination_vertex] != 'white' and visited[starting_vertex] != 'white':
+            path.insert(0, starting_vertex)
+
     def dfs_brady(self, starting_vertex, destination_vertex):
         # Create an empty set to store visited nodes
         visited = set()
@@ -360,5 +384,6 @@ if __name__ == '__main__':
         [1, 2, 4, 6]
         [1, 2, 4, 7, 6]
     '''
-    print('dfs:       ', graph.dfs(1, 6))
-    print('dfs_brady: ', graph.dfs(1, 6))
+    print('dfs:           ', graph.dfs(1, 6))
+    print('dfs_recursive: ', graph.dfs(1, 6))
+    print('dfs_brady:     ', graph.dfs(1, 6))
