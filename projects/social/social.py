@@ -1,6 +1,5 @@
 import random
 import string
-import functools
 import collections
 
 
@@ -79,9 +78,7 @@ class SocialGraph:
 
         The key is the friend's ID and the value is the path.
         """
-        # visited = {}  # Note that this is a dictionary, not a set
         # !!!! IMPLEMENT ME
-
         visited, queue = {userID: [userID]}, collections.deque([userID])
         while queue:
             current_friend = queue.popleft()
@@ -91,16 +88,32 @@ class SocialGraph:
                     path.append(next_friend)
                     visited[next_friend] = path
                     queue.append(next_friend)
-
         return visited
+
+    def avg_network(self, degrees=float('inf')):
+        connected_friends = 0
+        avg_path_len = 0
+
+        for user in self.users:
+            paths = self.getAllSocialPaths(user)
+            path_lengths = 0
+            for path in paths.values():
+                if len(path) <= degrees + 1:
+                    path_lengths += len(path)
+                    connected_friends += 1
+            avg_path_len += path_lengths / len(paths)
+        result = (f'''Average size of extended network (up to {degrees} degrees of separation): {connected_friends / len(self.users)} out of {len(self.users)}.\n\n'''
+                  f'''Average degree of separation between friends in extended network: {avg_path_len / (connected_friends / len(self.users))} out of {len(self.users)}\n''')
+        return result
+
+    def list_names(self):
+        result = '\n' + \
+            ', '.join([user.name for user in self.users.values()]) + '\n'
+        return result
 
 
 if __name__ == '__main__':
     sg = SocialGraph()
-    sg.populateGraph(5, 2)
-    print([(k, v.name) for k, v in sg.users.items()])
-    print(sg.friendships)
-    connections = sg.getAllSocialPaths(1)
-    print(connections)
-    print(functools.reduce((lambda x, y: x + y),
-                           [len(v) for k, v in sg.friendships.items()]) / 5)
+    sg.populateGraph(1000, 5)
+    print(sg.list_names())
+    print(sg.avg_network(2))
