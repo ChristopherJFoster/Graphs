@@ -96,6 +96,8 @@ class Graph:
         # Return the traversal record
         return traversal
 
+    # def dft_brady(self, starting_vertex):
+
     def dft_recursive(self, starting_vertex):
         """
         Print each vertex in depth-first order

@@ -1,6 +1,7 @@
 import random
 import string
 import functools
+import collections
 
 
 class User:
@@ -78,17 +79,28 @@ class SocialGraph:
 
         The key is the friend's ID and the value is the path.
         """
-        visited = {}  # Note that this is a dictionary, not a set
+        # visited = {}  # Note that this is a dictionary, not a set
         # !!!! IMPLEMENT ME
+
+        visited, queue = {userID: [userID]}, collections.deque([userID])
+        while queue:
+            current_friend = queue.popleft()
+            for next_friend in self.friendships[current_friend]:
+                if next_friend not in visited:
+                    path = list(visited[current_friend])
+                    path.append(next_friend)
+                    visited[next_friend] = path
+                    queue.append(next_friend)
+
         return visited
 
 
 if __name__ == '__main__':
     sg = SocialGraph()
-    sg.populateGraph(10, 2)
+    sg.populateGraph(5, 2)
     print([(k, v.name) for k, v in sg.users.items()])
     print(sg.friendships)
     connections = sg.getAllSocialPaths(1)
     print(connections)
     print(functools.reduce((lambda x, y: x + y),
-                           [len(v) for k, v in sg.friendships.items()]) / 10)
+                           [len(v) for k, v in sg.friendships.items()]) / 5)
