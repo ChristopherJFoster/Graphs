@@ -71,4 +71,4 @@ Note that in this sample, Users 3, 4 and 9 are not in User 1's extended social n
 
    Finally, if the result is above zero, the function will assign that number of new friends to the user (making sure not to add the same new friend twice).
 
-   One tradeoff of this `O(n)` implementation is that it doesn't generate exactly the number of friendships needed to get the average provided. Another tradeoff is that users toward the end of the list will have, on average, a larger number of friends than those toward the beginning of the list. The first user can only befriend others, while the last user has a chance to be befriended by every other user in the list.
+   One tradeoff of this `O(n)` implementation is that it doesn't generate exactly the number of friendships needed to get the average that is passed into populateGraph() as an argument. Another tradeoff is that users toward the end of the list will have, on average, a larger number of friends than users toward the beginning of the list. The first user can only befriend others, while the last user has a chance to be befriended by every other user in the list.
