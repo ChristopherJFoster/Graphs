@@ -109,9 +109,11 @@ class SocialGraph:
                     path_lengths += len(path) - 1
                     connected_friends += 1
             avg_path_len += path_lengths / len(paths)
+
         result = (f'''Average number of friends: {avg_num_friends / len(self.users)}\n\n'''
                   f'''Average size of extended network (up to {degrees} degrees of separation): {connected_friends / len(self.users)} out of {len(self.users)} users.\n\n'''
                   f'''Average degrees of separation between friends in extended network: {avg_path_len / (connected_friends / len(self.users))}\n''')
+
         return result
 
     def list_names(self):
