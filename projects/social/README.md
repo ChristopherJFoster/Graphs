@@ -62,3 +62,13 @@ Note that in this sample, Users 3, 4 and 9 are not in User 1's extended social n
    Given the fact that there is no limit on the degrees of separation, I'm not _that_ surprised at the average size of the extended network. But let's say we're trying to model the size of the average user's network if we only include people they've actually interacted with. We might imagine that such a network would only include two degrees of separation (direct friends and friends of friends). If create 1000 users with 5 random direct friends each, and limit their extended network to 2 degrees of separation or fewer, then the average size of extended networks drops from 98.5% of all users to just 3% of all users. This figure seems much more realistic to me.
 
 2. If you followed the hints for part 1, your `populateGraph()` will run in O(n^2) time. Refactor your code to run in O(n) time. Are there any tradeoffs that come with this implementation?
+
+   My implementation iterates through the list of users once (`O(n)` time).
+
+   For each user, the function generates a random number from 0 to 2 \* the average number of friends that was provided, then subtracts the number of friends the user already has (from users earlier in the list befriending them).
+
+   Then the function compares that number to the number of users remaining in the list, with the result being the minimum of the two numbers (so the function doesn't attempt to assign more new friends to the user than there are left in the list).
+
+   Finally, if the result is above zero, the function will assign that number of new friends to the user (making sure not to add the same new friend twice).
+
+   One tradeoff of this `O(n)` implementation is that it doesn't generate exactly the number of friendships needed to get the average provided. Another tradeoff is that users toward the end of the list will have, on average, a larger number of friends than those toward the beginning of the list. The first user can only befriend others, while the last user has a chance to be befriended by every other user in the list.

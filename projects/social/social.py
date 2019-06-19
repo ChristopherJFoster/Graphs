@@ -58,16 +58,21 @@ class SocialGraph:
 
         # Create friendships
 
-        # for i in range(1, len(self.users) - 1):
-        #     for _ in range(1, random.randint(0, 2 * avgFriendships) - len(self.friendships[i])):
-        #         self.addFriendship(i, random.randint(i + 1, numUsers))
+        # O(n^2) time:
+        # possible_friendships = [(x, y) for x in self.users.keys()
+        #                         for y in self.users.keys() if x != y and x < y]
+        # random.shuffle(possible_friendships)
+        # for i in range((numUsers * avgFriendships) // 2):
+        #     self.addFriendship(
+        #         possible_friendships[i][0], possible_friendships[i][1])
 
-        possible_friendships = [(x, y) for x in self.users.keys()
-                                for y in self.users.keys() if x != y and x < y]
-        random.shuffle(possible_friendships)
-        for i in range((numUsers * avgFriendships) // 2):
-            self.addFriendship(
-                possible_friendships[i][0], possible_friendships[i][1])
+        # O(n) time:
+        for i in range(1, len(self.users)):
+            for _ in range(1, min(random.randint(0, 2 * avgFriendships) - len(self.friendships[i]), len(self.users) - i)):
+                new_friend = random.randint(i + 1, numUsers)
+                while new_friend in self.friendships[i]:
+                    new_friend = random.randint(i + 1, numUsers)
+                self.addFriendship(i, new_friend)
 
     def getAllSocialPaths(self, userID):
         """
@@ -91,19 +96,22 @@ class SocialGraph:
         return visited
 
     def avg_network(self, degrees=float('inf')):
+        avg_num_friends = 0
         connected_friends = 0
         avg_path_len = 0
 
         for user in self.users:
+            avg_num_friends += len(self.friendships[user])
             paths = self.getAllSocialPaths(user)
             path_lengths = 0
             for path in paths.values():
-                if len(path) <= degrees + 1:
-                    path_lengths += len(path)
+                if len(path) > 1 and len(path) <= degrees + 1:
+                    path_lengths += len(path) - 1
                     connected_friends += 1
             avg_path_len += path_lengths / len(paths)
-        result = (f'''Average size of extended network (up to {degrees} degrees of separation): {connected_friends / len(self.users)} out of {len(self.users)}.\n\n'''
-                  f'''Average degree of separation between friends in extended network: {avg_path_len / (connected_friends / len(self.users))} out of {len(self.users)}\n''')
+        result = (f'''Average number of friends: {avg_num_friends / len(self.users)}\n\n'''
+                  f'''Average size of extended network (up to {degrees} degrees of separation): {connected_friends / len(self.users)} out of {len(self.users)} users.\n\n'''
+                  f'''Average degrees of separation between friends in extended network: {avg_path_len / (connected_friends / len(self.users))}\n''')
         return result
 
     def list_names(self):
