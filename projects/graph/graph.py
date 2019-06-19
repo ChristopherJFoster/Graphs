@@ -59,7 +59,17 @@ class Graph:
         # Return the traversal record
         return traversal
 
-    # def bft_brady(self, starting_vertex):
+    def bft_brady(self, starting_vertex):
+        visited = set()
+        q = Queue()
+        q.enqueue(starting_vertex)
+        while q.size() > 0:
+            v = q.dequeue()
+            if v not in visited:
+                visited.add(v)
+                for neighbor in self.vertices[v]:
+                    q.enqueue(neighbor)
+        return visited
 
     def dft(self, starting_vertex):
         """
@@ -96,7 +106,17 @@ class Graph:
         # Return the traversal record
         return traversal
 
-    # def dft_brady(self, starting_vertex):
+    def dft_brady(self, starting_vertex):
+        visited = set()
+        s = Stack()
+        s.push(starting_vertex)
+        while s.size() > 0:
+            v = s.pop()
+            if v not in visited:
+                visited.add(v)
+                for neighbor in self.vertices[v]:
+                    s.push(neighbor)
+        return visited
 
     def dft_recursive(self, starting_vertex):
         """
@@ -353,7 +373,8 @@ if __name__ == '__main__':
         1, 2, 4, 3, 7, 6, 5
         1, 2, 4, 3, 7, 5, 6
     '''
-    print('bft: ', graph.bft(1))
+    print('bft:       ', graph.bft(1))
+    print('bft_brady: ', graph.bft_brady(1))
 
     '''
     Valid DFT paths:
@@ -362,7 +383,8 @@ if __name__ == '__main__':
         1, 2, 4, 7, 6, 3, 5
         1, 2, 4, 6, 3, 5, 7
     '''
-    print('dft: ', graph.dft(1))
+    print('dft:       ', graph.dft(1))
+    print('dft_brady: ', graph.dft(1))
 
     '''
     Valid DFT recursive paths:
