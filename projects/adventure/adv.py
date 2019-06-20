@@ -4,7 +4,6 @@ from world import World
 
 import random
 import collections
-import time
 
 # Load world
 world = World()
@@ -65,8 +64,7 @@ def maze_traversal(num_rooms=500):
                 graph[prev_room][next_dir] = cur.id
                 graph[cur.id][prev_dir] = prev_room
 
-            # Check the current room for unexplored doors. Check the directions for '?'s, using whatever order from quad_dir_orders is currently being tested, based on what quadrant the current room is inS.
-
+            # Check the current room for unexplored doors. Check the directions for '?'s, using whatever order from quad_dir_orders is currently being tested, based on what quadrant the current room is in.
             if cur.x >= 13 and cur.y >= 15:
                 quad = 0
             elif cur.x >= 13 and cur.y <= 14:
@@ -121,9 +119,7 @@ def maze_traversal(num_rooms=500):
 
     return shortest_traversalPath
 
-start = time.time()
 traversalPath = maze_traversal(len(roomGraph))
-end = time.time()
 
 # TRAVERSAL TEST
 visited_rooms = set()
