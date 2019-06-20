@@ -45,14 +45,25 @@ def maze_traversal(num_rooms=500):
             graph[prev_room][next_dir] = player.currentRoom.id
             graph[player.currentRoom.id][prev_dir] = prev_room
         # Take the first '?' exit
-        for dir, exp in graph[player.currentRoom.id].items():
-            '''
-            Here is where I would update the logic for choosing between multiple unexplored directions
-            '''
-            if exp == '?':
-                unexp_dir = True
-                next_dir = dir
-                break
+
+
+        if 'n' in graph[player.currentRoom.id] and graph[player.currentRoom.id]['n'] == '?':
+            next_dir = 'n'
+            unexp_dir = True
+        elif 'e' in graph[player.currentRoom.id] and graph[player.currentRoom.id]['e'] == '?':
+            next_dir = 'e'
+            unexp_dir = True
+        elif 's' in graph[player.currentRoom.id] and graph[player.currentRoom.id]['s'] == '?':
+            next_dir = 's'
+            unexp_dir = True
+        elif 'w' in graph[player.currentRoom.id] and graph[player.currentRoom.id]['w'] == '?':
+            next_dir = 'w'
+            unexp_dir = True
+        # for dir, exp in graph[player.currentRoom.id].items():
+        #     if exp == '?':
+        #         unexp_dir = True
+        #         next_dir = dir
+        #         break
         # If there is no '?' exit, generate the shortest path to the nearest room with a '?' exit, then follow that path
         if unexp_dir == False:
             # Old random exit chooser
