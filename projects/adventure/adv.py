@@ -22,7 +22,7 @@ roomGraph={494: [(1, 8), {'e': 457}], 492: [(1, 20), {'e': 400}], 493: [(2, 5), 
 world.loadGraph(roomGraph)
 
 # UNCOMMENT TO VIEW MAP
-world.printRooms()
+# world.printRooms()
 
 player = Player("Name", world.startingRoom)
 
@@ -30,101 +30,91 @@ player = Player("Name", world.startingRoom)
 
 traversalPath = []
 
+# For rooms with > 1 '?'s, the function must decide which '?' to explore first. The following are the 24 possible orders for the four cardinal directions. Each of the 24 orders is tested in the maze, and the one that yields the shortest path (or the first one if there's a tie) is returned.
+dir_orders = [[w, x, y, z] for w in ['n', 'e', 's', 'w'] for x in ['n', 'e', 's', 'w'] for y in ['n', 'e', 's', 'w'] for z in ['n', 'e', 's', 'w'] if w != x and w != y and w != z and x != y and x != z and y != z]
+# This is an "opposite direction" lookup dictionary for filling out the graph.
+prev_dirs = {'n': 's', 's': 'n', 'e': 'w', 'w': 'e'}
 
 def maze_traversal(num_rooms=500):
-    prev_dirs = {'n': 's', 's': 'n', 'e': 'w', 'w': 'e'}
-    graph = dict()
-    next_dir, prev_room, prev_dir, unexp_dir = None, None, None, False
-    while len(graph) < num_rooms:
-        # Add current room to graph (if it's not there yet)
-        if player.currentRoom.id not in graph:
-            graph[player.currentRoom.id] = {
-                dir: '?' for dir in player.currentRoom.getExits()}
-        # Update the previous room's graph entry with the current room's id, and vice versa (except for first room)
-        if next_dir:
-            graph[prev_room][next_dir] = player.currentRoom.id
-            graph[player.currentRoom.id][prev_dir] = prev_room
-        # Take the first '?' exit
+    shortest_traversalPath = []
+    dir_order_scores = []
+    for order in dir_orders:
+        # Reset variables for each dir_orders test.
+        player.currentRoom, current_traversalPath = world.startingRoom, []
+        graph, next_dir, prev_room, prev_dir = dict(), None, None, None
+        while True:
+            # Reset variables for each room.
+            unexp_dir = False
+            cur = player.currentRoom
 
-
-        if 'n' in graph[player.currentRoom.id] and graph[player.currentRoom.id]['n'] == '?':
-            next_dir = 'n'
-            unexp_dir = True
-        elif 'e' in graph[player.currentRoom.id] and graph[player.currentRoom.id]['e'] == '?':
-            next_dir = 'e'
-            unexp_dir = True
-        elif 's' in graph[player.currentRoom.id] and graph[player.currentRoom.id]['s'] == '?':
-            next_dir = 's'
-            unexp_dir = True
-        elif 'w' in graph[player.currentRoom.id] and graph[player.currentRoom.id]['w'] == '?':
-            next_dir = 'w'
-            unexp_dir = True
-        # for dir, exp in graph[player.currentRoom.id].items():
-        #     if exp == '?':
-        #         unexp_dir = True
-        #         next_dir = dir
-        #         break
-        # If there is no '?' exit, generate the shortest path to the nearest room with a '?' exit, then follow that path
-        if unexp_dir == False:
-            # Old random exit chooser
-            # cand_dirs = player.currentRoom.getExits()
-            # next_dir = cand_dirs[random.randint(
-            #     0, len(cand_dirs) - 1)]
-
-            # Create an empty Queue and enqueue A PATH TO the starting vertex
-            visited, q = set(), collections.deque([[player.currentRoom.id]])
-
-            # While the queue is not empty...
-            while len(q) > 0:
-                path = q.popleft()
-                room = path[-1]
-                # print('q: ', q)
-                # print('path: ', path)
-                # print('visited: ', visited)
-                # print('room: ', room)
-                # print('traversal: ', traversalPath)
-                # IF VERTEX == TARGET, RETURN PATH
-                if '?' in graph[room].values():
-                    # follow path until you get to the room right before the room with the '?'.
-                    print('Found it: ', path)
-                    for dir in range(len(path) - 2):
-                        print(dir)
-                        traversalPath.append(path[dir])
-                        player.travel(path[dir])
-                    next_dir = path[-2]
+            # Add current room to graph (if it's not there yet).
+            if cur.id not in graph:
+                graph[cur.id] = {
+                    dir: '?' for dir in cur.getExits()}
+                # As soon as the last room is reached, stop.
+                if len(graph) == num_rooms:
                     break
 
-                # If that vertex has not been visited...
-                if room not in visited:
-                    # Mark it as visited
-                    visited.add(room)
-                    # Then add A PATH TO all of its neighbors to the back of the queue
-                    for dir, id in graph[room].items():
-                        # Copy the path
-                        path_copy = list(path)
-                        # replace the last value in the path (a room id) with the next direction, then append the room id
-                        path_copy[-1] = dir
-                        path_copy.append(id)
-                        # Enqueue copy
-                        q.append(path_copy)
+            # Update the previous room's graph entry with the current room's id, and vice versa (except for first room, which has no previous room).
+            if len(graph) > 1:
+                graph[prev_room][next_dir] = cur.id
+                graph[cur.id][prev_dir] = prev_room
 
-        # Update variables for next pass
-        prev_room = player.currentRoom.id
-        prev_dir = prev_dirs[next_dir]
-        unexp_dir = False
+            # Check the current room for unexplored doors. Check the directions for '?'s, using whatever order from dir_orders is currently being tested.
+            for dir in order:
+                if dir in graph[cur.id] and graph[cur.id][dir] == '?':
+                    next_dir = dir
+                    unexp_dir = True
+                    break
 
-        # print('Current room: ', player.currentRoom.id)
-        # print(next_dir, prev_room, prev_dir)
-        # print(graph)
+            # If there is no '?' exit, use BFS to generate the shortest path to the nearest room with a '?' exit, then follow that path
+            if unexp_dir == False:
+                visited, q = set(), collections.deque([[cur.id]])
+                while len(q) > 0:
+                    path = q.popleft()
+                    room = path[-1]
 
-        # Add next direction to the traversal path, then travel in that direction
-        traversalPath.append(next_dir)
-        player.travel(next_dir)
+                    # Once a '?' is found, stop BFS and follow the path.
+                    if '?' in graph[room].values():
+                        # Stop in the room just before the room with the '?'(s).
+                        for dir in range(len(path) - 2):
+                            current_traversalPath.append(path[dir])
+                            player.travel(path[dir])
+                        next_dir = path[-2]
+                        break
 
-    print(traversalPath)
+                    if room not in visited:
+                        visited.add(room)
+                        for dir, id in graph[room].items():
+                            path_copy = list(path)
+                            # Replace the last value in the path (a room id) with the next direction, then append the next room id.
+                            path_copy[-1] = dir
+                            path_copy.append(id)
+                            q.append(path_copy)
+
+            # Update variables for the next room.
+            prev_room = player.currentRoom.id
+            prev_dir = prev_dirs[next_dir]
+
+            # Add next direction to the traversal path, then travel in that direction.
+            current_traversalPath.append(next_dir)
+            player.travel(next_dir)
+        
+        # If this is the first completed dir_orders test, or if the current dir_orders test yeilds a new shortest path, set the shortest path equal to the current path.
+        if len(shortest_traversalPath) == 0 or len(current_traversalPath) < len(shortest_traversalPath):
+            shortest_traversalPath = current_traversalPath
+        # Add the path length to the direction order scorebook.
+        dir_order_scores.append([order, len(current_traversalPath)])
+
+    # Print direction order scorebook.
+    for score in dir_order_scores:
+        print(f'{score[0]}: {score[1]}')
+
+    return shortest_traversalPath
 
 
-maze_traversal(len(roomGraph))
+traversalPath = maze_traversal(len(roomGraph))
+
 
 # TRAVERSAL TEST
 visited_rooms = set()
