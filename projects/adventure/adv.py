@@ -4,6 +4,7 @@ from world import World
 
 import random
 import collections
+import time
 
 # Load world
 world = World()
@@ -35,13 +36,17 @@ dir_orders = [[w, x, y, z] for w in ['n', 'e', 's', 'w'] for x in ['n', 'e', 's'
 # This is an "opposite direction" lookup dictionary for filling out the graph.
 prev_dirs = {'n': 's', 's': 'n', 'e': 'w', 'w': 'e'}
 
+# The following is a list comprension of dir_orders with different combinations of dir_orders for each quadrant of the maze. With 4 quadrants and 24 direction orders, the list has 331,776 elements. I looped over each one and found one that yields a 951 step traversal. The test took about 30 minutes. To spare you, I've shortened the list to just the direction order that yielded the 951. There may be other combos that tie it.
+# quad_dir_orders = [[w, x, y, z] for w in dir_orders for x in dir_orders for y in dir_orders for z in dir_orders]
+
+quad_dir_orders = [[['n', 'e', 's', 'w'], ['n', 'e', 's', 'w'], ['s', 'w', 'n', 'e'], ['n', 'w', 's', 'e']]]
+
 def maze_traversal(num_rooms=500):
     shortest_traversalPath = []
-    dir_order_scores = []
-    for order in dir_orders:
+    for dir_order in quad_dir_orders:
         # Reset variables for each dir_orders test.
         player.currentRoom, current_traversalPath = world.startingRoom, []
-        graph, next_dir, prev_room, prev_dir = dict(), None, None, None
+        graph, next_dir, prev_room, prev_dir, quad = dict(), None, None, None, None
         while True:
             # Reset variables for each room.
             unexp_dir = False
@@ -60,8 +65,18 @@ def maze_traversal(num_rooms=500):
                 graph[prev_room][next_dir] = cur.id
                 graph[cur.id][prev_dir] = prev_room
 
-            # Check the current room for unexplored doors. Check the directions for '?'s, using whatever order from dir_orders is currently being tested.
-            for dir in order:
+            # Check the current room for unexplored doors. Check the directions for '?'s, using whatever order from quad_dir_orders is currently being tested, based on what quadrant the current room is inS.
+
+            if cur.x >= 13 and cur.y >= 15:
+                quad = 0
+            elif cur.x >= 13 and cur.y <= 14:
+                quad = 1
+            elif cur.x <= 12 and cur.y <= 14:
+                quad = 2
+            else:
+                quad = 3
+
+            for dir in dir_order[quad]:
                 if dir in graph[cur.id] and graph[cur.id][dir] == '?':
                     next_dir = dir
                     unexp_dir = True
@@ -103,18 +118,12 @@ def maze_traversal(num_rooms=500):
         # If this is the first completed dir_orders test, or if the current dir_orders test yeilds a new shortest path, set the shortest path equal to the current path.
         if len(shortest_traversalPath) == 0 or len(current_traversalPath) < len(shortest_traversalPath):
             shortest_traversalPath = current_traversalPath
-        # Add the path length to the direction order scorebook.
-        dir_order_scores.append([order, len(current_traversalPath)])
-
-    # Print direction order scorebook.
-    for score in dir_order_scores:
-        print(f'{score[0]}: {score[1]}')
 
     return shortest_traversalPath
 
-
+start = time.time()
 traversalPath = maze_traversal(len(roomGraph))
-
+end = time.time()
 
 # TRAVERSAL TEST
 visited_rooms = set()
@@ -131,7 +140,6 @@ if len(visited_rooms) == len(roomGraph):
 else:
     print("TESTS FAILED: INCOMPLETE TRAVERSAL")
     print(f"{len(roomGraph) - len(visited_rooms)} unvisited rooms")
-
 
 #######
 # UNCOMMENT TO WALK AROUND
