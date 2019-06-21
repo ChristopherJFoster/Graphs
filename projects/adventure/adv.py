@@ -36,19 +36,15 @@ dir_orders = [[w, x, y, z] for w in ['n', 'e', 's', 'w'] for x in ['n', 'e', 's'
 # This is a lookup dictionary for opposite directions, used to fill out the graph.
 opp_dirs = {'n': 's', 's': 'n', 'e': 'w', 'w': 'e'}
 
-# The following is a list comprension of dir_orders with different combinations of dir_orders for each quadrant of the maze. With 4 quadrants and 24 direction orders, the list has 331,776 elements. I looped over each one and found one that yields a 925-step traversal. The test took about 30 minutes. To spare you, I've shortened the list to just the combination of direction orders that yields 925 (there may be other direction order combos that tie it).
+# The following is a list comprension of dir_orders with different combinations of dir_orders for each quadrant of the maze. With 4 quadrants and 24 direction orders, the list has 331,776 elements. I looped over each one and found one that yields a 925-step traversal. The test took about 30 minutes (55 minutes if it looks for dead ends three rooms away). To spare you, I've shortened the list to just the combination of direction orders that yields 925 (there may be other direction order combos that tie it).
 # quad_dir_orders = [[w, x, y, z] for w in dir_orders for x in dir_orders for y in dir_orders for z in dir_orders]
 
 quad_dir_orders = [[['e', 'n', 'w', 's'], ['e', 'w', 's', 'n'], ['w', 's', 'n', 'e'], ['n', 'w', 'e', 's']]]
 
 def maze_traversal(num_rooms=500):
     # low_x = high_x = low_y = high_y = x_neg = x_pos = y_neg = y_pos = None
-    shortest_traversalPath = []
-    shortest_dirs = []
-    counter = 0
+    shortest_traversalPath, shortest_dirs, counter = [], None, 0
     for dir_order in quad_dir_orders:
-        counter += 1
-        print(counter, shortest_dirs, len(shortest_traversalPath))
         # Reset variables for each dir_orders test.
         player.currentRoom, current_traversalPath = world.startingRoom, []
         graph, next_dir, prev_room, prev_dir, quad = dict(), None, None, None, None
@@ -81,7 +77,11 @@ def maze_traversal(num_rooms=500):
             elif cur.x <= 12 and cur.y >= 15:
                 quad = 3
 
-            # Peek into each '?' direction. If the room in that direction is a dead end (only one exit), go in that direction.
+            '''
+            Peek into each '?' direction. If the room in that direction is a dead end (only one exit), go in that direction. Now it looks for dead ends one, two, and three rooms away (the two- and three-room distances require in-between rooms to have exactly two exits).
+            
+            Note that 925 moves was discovered using only the one-room-away dead end search. To improve on 925, I would need to look for dead-end _branches_. If the player is standing next to the only entrance to an unexplored dead-end brances of the maze, then the optimal move at that point is to explore that branch. One approach would be to traverse the maze once, identifying all the dead-end branches and the room ids and directions of their entrances. Then, on a second pass through the maze, explore dead-end brances as they are reached. A large dead-end branch might be filled with smaller dead-end branches. This approach would not require "peeking" (as I've called it) since we traverse the maze (inefficiently) and map it out first.
+            '''
 
             # One-room dead end
             for dir in dir_order[quad]:
@@ -162,7 +162,10 @@ def maze_traversal(num_rooms=500):
         if len(shortest_traversalPath) == 0 or len(current_traversalPath) < len(shortest_traversalPath):
             shortest_traversalPath = current_traversalPath
             shortest_dirs = dir_order
-    
+
+        counter += 1
+        print(counter, shortest_dirs, len(shortest_traversalPath))
+
     return shortest_traversalPath
 
 traversalPath = maze_traversal(len(roomGraph))
