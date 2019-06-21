@@ -32,13 +32,14 @@ traversalPath = []
 
 # For rooms with > 1 '?'s, the function must decide which '?' to explore first. The following are the 24 possible orders for the four cardinal directions. Each of the 24 orders is tested in the maze, and the one that yields the shortest path (or the first one if there's a tie) is returned.
 dir_orders = [[w, x, y, z] for w in ['n', 'e', 's', 'w'] for x in ['n', 'e', 's', 'w'] for y in ['n', 'e', 's', 'w'] for z in ['n', 'e', 's', 'w'] if w != x and w != y and w != z and x != y and x != z and y != z]
-# This is an "opposite direction" lookup dictionary for filling out the graph.
+
+# This is a lookup dictionary for opposite directions, used to fill out the graph.
 prev_dirs = {'n': 's', 's': 'n', 'e': 'w', 'w': 'e'}
 
-# The following is a list comprension of dir_orders with different combinations of dir_orders for each quadrant of the maze. With 4 quadrants and 24 direction orders, the list has 331,776 elements. I looped over each one and found one that yields a 951 step traversal. The test took about 30 minutes. To spare you, I've shortened the list to just the direction order that yielded the 951. There may be other combos that tie it.
+# The following is a list comprension of dir_orders with different combinations of dir_orders for each quadrant of the maze. With 4 quadrants and 24 direction orders, the list has 331,776 elements. I looped over each one and found one that yields a 925-step traversal. The test took about 30 minutes. To spare you, I've shortened the list to just the combination of direction orders that yields 925 (there may be other direction order combos that tie it).
 # quad_dir_orders = [[w, x, y, z] for w in dir_orders for x in dir_orders for y in dir_orders for z in dir_orders]
 
-quad_dir_orders = [[['n', 'e', 's', 'w'], ['n', 'e', 's', 'w'], ['s', 'w', 'n', 'e'], ['n', 'w', 's', 'e']]]
+quad_dir_orders = [[['e', 'n', 'w', 's'], ['e', 'w', 's', 'n'], ['w', 's', 'n', 'e'], ['n', 'w', 'e', 's']]]
 
 def maze_traversal(num_rooms=500):
     shortest_traversalPath = []
@@ -48,6 +49,7 @@ def maze_traversal(num_rooms=500):
         graph, next_dir, prev_room, prev_dir, quad = dict(), None, None, None, None
         while True:
             # Reset variables for each room.
+            dead_end_check = False
             unexp_dir = False
             cur = player.currentRoom
 
@@ -74,11 +76,20 @@ def maze_traversal(num_rooms=500):
             else:
                 quad = 3
 
+            # Peak into each '?' direction. If the room in that direction is a dead end (only one exit), go in that direction.
             for dir in dir_order[quad]:
-                if dir in graph[cur.id] and graph[cur.id][dir] == '?':
+                if dir in graph[cur.id] and graph[cur.id][dir] == '?' and len(cur.getRoomInDirection(dir).getExits()) == 1:
                     next_dir = dir
+                    dead_end_check = True
                     unexp_dir = True
                     break
+
+            if dead_end_check == False:
+                for dir in dir_order[quad]:
+                    if dir in graph[cur.id] and graph[cur.id][dir] == '?':
+                        next_dir = dir
+                        unexp_dir = True
+                        break
 
             # If there is no '?' exit, use BFS to generate the shortest path to the nearest room with a '?' exit, then follow that path
             if unexp_dir == False:
@@ -120,6 +131,7 @@ def maze_traversal(num_rooms=500):
     return shortest_traversalPath
 
 traversalPath = maze_traversal(len(roomGraph))
+print(traversalPath)
 
 # TRAVERSAL TEST
 visited_rooms = set()
