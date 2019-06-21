@@ -81,7 +81,7 @@ def maze_traversal(num_rooms=500):
             elif cur.x <= 12 and cur.y >= 15:
                 quad = 3
 
-            # Peak into each '?' direction. If the room in that direction is a dead end (only one exit), go in that direction.
+            # Peek into each '?' direction. If the room in that direction is a dead end (only one exit), go in that direction.
 
             # One-room dead end
             for dir in dir_order[quad]:
@@ -109,7 +109,6 @@ def maze_traversal(num_rooms=500):
                     if dir in graph[cur.id] and graph[cur.id][dir] == '?' and len(cur.getRoomInDirection(dir).getExits()) == 2:
                         for next_room_dir in cur.getRoomInDirection(dir).getExits():
                             if next_room_dir != opp_dirs[dir]:
-                                # might need help
                                 if len(cur.getRoomInDirection(dir).getRoomInDirection(next_room_dir).getExits()) == 2:
                                     for next_next_room_dir in cur.getRoomInDirection(dir).getRoomInDirection(next_room_dir).getExits():
                                         if next_next_room_dir != opp_dirs[next_room_dir]:
