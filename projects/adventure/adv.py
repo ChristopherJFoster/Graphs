@@ -34,7 +34,7 @@ traversalPath = []
 dir_orders = [[w, x, y, z] for w in ['n', 'e', 's', 'w'] for x in ['n', 'e', 's', 'w'] for y in ['n', 'e', 's', 'w'] for z in ['n', 'e', 's', 'w'] if w != x and w != y and w != z and x != y and x != z and y != z]
 
 # This is a lookup dictionary for opposite directions, used to fill out the graph.
-prev_dirs = {'n': 's', 's': 'n', 'e': 'w', 'w': 'e'}
+opp_dirs = {'n': 's', 's': 'n', 'e': 'w', 'w': 'e'}
 
 # The following is a list comprension of dir_orders with different combinations of dir_orders for each quadrant of the maze. With 4 quadrants and 24 direction orders, the list has 331,776 elements. I looped over each one and found one that yields a 925-step traversal. The test took about 30 minutes. To spare you, I've shortened the list to just the combination of direction orders that yields 925 (there may be other direction order combos that tie it).
 # quad_dir_orders = [[w, x, y, z] for w in dir_orders for x in dir_orders for y in dir_orders for z in dir_orders]
@@ -42,14 +42,19 @@ prev_dirs = {'n': 's', 's': 'n', 'e': 'w', 'w': 'e'}
 quad_dir_orders = [[['e', 'n', 'w', 's'], ['e', 'w', 's', 'n'], ['w', 's', 'n', 'e'], ['n', 'w', 'e', 's']]]
 
 def maze_traversal(num_rooms=500):
+    # low_x = high_x = low_y = high_y = x_neg = x_pos = y_neg = y_pos = None
     shortest_traversalPath = []
+    shortest_dirs = []
+    counter = 0
     for dir_order in quad_dir_orders:
+        counter += 1
+        print(counter, shortest_dirs, len(shortest_traversalPath))
         # Reset variables for each dir_orders test.
         player.currentRoom, current_traversalPath = world.startingRoom, []
         graph, next_dir, prev_room, prev_dir, quad = dict(), None, None, None, None
         while True:
             # Reset variables for each room.
-            dead_end_check = False
+            dead_end = False
             unexp_dir = False
             cur = player.currentRoom
 
@@ -73,18 +78,48 @@ def maze_traversal(num_rooms=500):
                 quad = 1
             elif cur.x <= 12 and cur.y <= 14:
                 quad = 2
-            else:
+            elif cur.x <= 12 and cur.y >= 15:
                 quad = 3
 
             # Peak into each '?' direction. If the room in that direction is a dead end (only one exit), go in that direction.
+
+            # One-room dead end
             for dir in dir_order[quad]:
                 if dir in graph[cur.id] and graph[cur.id][dir] == '?' and len(cur.getRoomInDirection(dir).getExits()) == 1:
                     next_dir = dir
-                    dead_end_check = True
+                    dead_end = True
                     unexp_dir = True
                     break
 
-            if dead_end_check == False:
+            # Two-room dead end
+            if dead_end == False:
+                for dir in dir_order[quad]:
+                    if dir in graph[cur.id] and graph[cur.id][dir] == '?' and len(cur.getRoomInDirection(dir).getExits()) == 2:
+                        for next_room_dir in cur.getRoomInDirection(dir).getExits():
+                            if next_room_dir != opp_dirs[dir]:
+                                if len(cur.getRoomInDirection(dir).getRoomInDirection(next_room_dir).getExits()) == 1:
+                                    next_dir = dir
+                                    dead_end = True
+                                    unexp_dir = True
+                                    break
+
+            # Three-room dead end
+            if dead_end == False:
+                for dir in dir_order[quad]:
+                    if dir in graph[cur.id] and graph[cur.id][dir] == '?' and len(cur.getRoomInDirection(dir).getExits()) == 2:
+                        for next_room_dir in cur.getRoomInDirection(dir).getExits():
+                            if next_room_dir != opp_dirs[dir]:
+                                # might need help
+                                if len(cur.getRoomInDirection(dir).getRoomInDirection(next_room_dir).getExits()) == 2:
+                                    for next_next_room_dir in cur.getRoomInDirection(dir).getRoomInDirection(next_room_dir).getExits():
+                                        if next_next_room_dir != opp_dirs[next_room_dir]:
+                                            if len(cur.getRoomInDirection(dir).getRoomInDirection(next_room_dir).getRoomInDirection(next_next_room_dir).getExits()) == 1:
+                                                next_dir = dir
+                                                dead_end = True
+                                                unexp_dir = True
+                                                break
+
+            if dead_end == False:
                 for dir in dir_order[quad]:
                     if dir in graph[cur.id] and graph[cur.id][dir] == '?':
                         next_dir = dir
@@ -118,7 +153,7 @@ def maze_traversal(num_rooms=500):
 
             # Update variables for the next room.
             prev_room = player.currentRoom.id
-            prev_dir = prev_dirs[next_dir]
+            prev_dir = opp_dirs[next_dir]
 
             # Add next direction to the traversal path, then travel in that direction.
             current_traversalPath.append(next_dir)
@@ -127,7 +162,8 @@ def maze_traversal(num_rooms=500):
         # If this is the first completed dir_orders test, or if the current dir_orders test yeilds a new shortest path, set the shortest path equal to the current path.
         if len(shortest_traversalPath) == 0 or len(current_traversalPath) < len(shortest_traversalPath):
             shortest_traversalPath = current_traversalPath
-
+            shortest_dirs = dir_order
+    
     return shortest_traversalPath
 
 traversalPath = maze_traversal(len(roomGraph))
