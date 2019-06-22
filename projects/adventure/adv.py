@@ -79,8 +79,8 @@ def maze_traversal(num_rooms=500):
 
             '''
             Peek into each '?' direction. If the room in that direction is a dead end (only one exit), go in that direction. Now it looks for dead ends one, two, and three rooms away (the two- and three-room distances require in-between rooms to have exactly two exits).
-            
-            Note that 925 moves was discovered using only the one-room-away dead end search. To improve on 925, I would need to look for dead-end _branches_. If the player is standing next to the only entrance to an unexplored dead-end brances of the maze, then the optimal move at that point is to explore that branch. One approach would be to traverse the maze once, identifying all the dead-end branches and the room ids and directions of their entrances. Then, on a second pass through the maze, explore dead-end brances as they are reached. A large dead-end branch might be filled with smaller dead-end branches. This approach would not require "peeking" (as I've called it) since we traverse the maze (inefficiently) and map it out first.
+
+            Note that 925 moves was discovered using only the one-room-away dead end search. To improve on 925, I would need to look for dead-end _branches_. If the player is standing next to the only entrance to an unexplored dead-end branch of the maze, then the optimal move at that point is to explore that branch. One approach would be to traverse the maze once, identifying all the dead-end branches and the room ids and directions of their entrances. Then, on a second pass through the maze, explore dead-end brances as they are reached. A large dead-end branch might be filled with smaller dead-end branches. This approach would not require "peeking" (as I've called it) since we traverse the maze (inefficiently) and map it out first.
             '''
 
             # One-room dead end
