@@ -155,6 +155,7 @@ def maze_traversal(num_rooms=500):
         print('what')
         player.travel(next_dir)
     # print(graph)
+    
     # print(DEBRs)
 
     # Traverse again, obeying DEBRs
