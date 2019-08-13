@@ -21,9 +21,10 @@ world.printRooms()
 
 player = Player("Name", world.startingRoom)
 
-# Fill this out
 
-# For rooms with > 1 unexplored directions, we must decide which unexplored direction to explore first. The following are the 24 possible orders for the four cardinal directions. Each of the 24 orders is tested in the maze, and the one that yields the shortest path (or the first one if there is a tie) is returned.
+# FILL THIS IN
+
+# For rooms with > 1 unexplored direction, we must decide which unexplored direction to explore first. The following are the 24 possible orders for the four cardinal directions. Each of the 24 orders is tested in the maze, and the one that yields the shortest path (or the first one if there is a tie) is returned. These are also used when a room contains > 1 'dead end branch root' (see Phases 2 and 3, below).
 dir_orders = [[w, x, y, z] for w in ['n', 'e', 's', 'w'] for x in ['n', 'e', 's', 'w'] for y in [
     'n', 'e', 's', 'w'] for z in ['n', 'e', 's', 'w'] if w != x and w != y and w != z and x != y and x != z and y != z]
 
@@ -105,21 +106,21 @@ def maze_traversal(num_rooms=500):
         player.travel(next_dir)
 
     print('Phase 2: Build dictionary of DEBRs (Dead End Branch Roots)\n')
-    # Here we traverse the maze again in order to identify each 'dead end branch root' (DEBR). A DEBR is a room and direction combination (such as 145n) such that by travelling from that room in that direction one _must_ return to that room, from the opposite of that direction, in order to continue traversing the maze (i.e., the branch is a 'dead end branch' (DEB)). My key insight in achieving the 917-step traversal is that there is never a better time explore a DEB than when one is standing at its root. Phase 2 of my algorithm identifies every DEBR, and Phase 3 traverses the maze again while making sure to stop and explore every DEBR identified in Phase 2.
+    # Here we traverse the maze again in order to identify each 'dead end branch root' (DEBR). A DEBR is a room and direction combination (such as 145n) such that by travelling from that room in that direction one _must_ return to that room, from the opposite of that direction, in order to continue traversing the maze (i.e., the branch is a 'dead end branch' (DEB)). My key insight in achieving the 917-step traversal is that there is never a better time to explore a DEB than when one is standing at its root. Phase 2 of my algorithm identifies every DEBR, and Phase 3 traverses the maze again while making sure to stop and explore every DEBR identified in Phase 2.
 
     DEBRs = copy.deepcopy(graph)
     for room in DEBRs:
         for door in DEBRs[room]:
             DEBRs[room][door] = None
 
-    # Move player back to the starting room
+    # Move the player back to the starting room.
     player.currentRoom = world.startingRoom
 
     for next_dir in traversalPath:
         current = player.currentRoom
 
         for door in current.getExits():
-            # If door hasn't been tested for DEBR, test it
+            # If door hasn't been tested for DEBR, test it.
             if DEBRs[current.id][door] == None:
                 # To determine if a room/dir combo is a DEBR, start in the next room (in the candidate direction). Perform a BFS for the current room while forbidding return by the same door. If the current room cannot be found, then the room/dir combo is a DEBR.
                 visited, q = set(), collections.deque(
@@ -193,7 +194,7 @@ def maze_traversal(num_rooms=500):
                         shortest_dir_order = dir_order
                     break
 
-            # As DEBRs are completed, mark them so they are not re-explored.
+            # As DEBRs are completed, we mark them so they are not re-explored.
             if player.currentRoom.id == DEBR_values[-1][0] and prev_room == player.currentRoom.getRoomInDirection(DEBR_values[-1][-1]).id:
                 DEBR_values.pop()
                 DEBRs_copy[player.currentRoom.id][prev_dir] = False
@@ -260,10 +261,10 @@ def maze_traversal(num_rooms=500):
             current_traversalPath.append(next_dir)
             player.travel(next_dir)
 
-        # Prints the tested direction order and its step count (even if it is not the shortest path).
+        # The following prints the tested direction order and its step count (once each for the 24 direction orders).
         print(f'{dir_order}: {len(current_traversalPath)}')
 
-    # Once all 24 direction orders have been tested, print the direction order that yielded the shortest path (or the first, if there is a tie). Then print and return the set of directions for testing in the next section (per project guidelines).
+    # Once all 24 direction orders have been tested, the following prints the direction order that yielded the shortest path (or the first, if there is a tie), then prints and returns the set of directions for testing in the next section (per project guidelines).
     print(f'\nshortest_dir_order: {shortest_dir_order}')
     print(f'\nshortest_traversalPath:\n{shortest_traversalPath}')
     return shortest_traversalPath
@@ -306,10 +307,10 @@ print(f'\n{end_time - start_time} seconds')
 
 
 # Notes About Further Optimization
-# The rules of this maze traversal contest require us to generate a list a directions that, when followed, step into each room at least once. The moment the final room is entered, the traversal is complete - we need not return to the starting room. This means that there is likely further opportunity for optimization - roughly by ending our traversal as far from the starting room as possible.
+# The rules of this maze traversal contest require us to generate a list a directions that, when followed, step into each room at least once. The moment the final room is entered, the traversal is complete - we need not return to the starting room. This means that there is likely further opportunity for optimization - roughly by ending our traversal as far from the starting room as possible, which minimized backtracking.
 
 # A simple example: Let's say our maze is a single row of 10 rooms, numbered from west to east 0 - 9. If the starting room is room 1, then there are two directions to explore: east and west (each direction is DEBR, in fact). Regardless of which direction is chosen first, we must return to the starting room in order to explore the other direction. This means that (in this example at least) we should explore in the direction with the fewest rooms. To the west, there is one room, while to the east there are eight rooms. The optimal traversal would begin by traveling west to room 0, then traveling east to room 9, resulting in a 10-step traversal (traveling east then west results in a suboptimal 17-step traversal).
 
-# Though the above example is simple, I believe its principles apply to any graph whose branches, as measured from the starting room, are not of equal length. An optimal traversal, I hypothesize, would determine the ideal ending branch (IEB) for a traversal and its path would thus end in that branch. However, I have not yet implemented a solution that takes the IEB into account. I have, however, identified two problems in determining an IEB:
-# 1. We must _only_ count the longest DEB within the branch as part of its IEB score, since all DEBs except one will have to be re-traversed.
-# 2. The distance of the starting room to each candidate branch must be subtracted from that branch's IEB score, since every additional step taken to ensure that a candidate branch is last will (obviously) add to the length of the traversal.
+# Though the above example is simple, I believe its principles apply to any graph whose branches, as measured from the starting room, are not of equal length. An optimal traversal algorithm, I hypothesize, would determine the ideal ending branch (IEB) for a traversal and its path would thus end in that branch. However, I have not yet implemented a solution that takes the IEB into account. I have, however, identified two puzzles to solve in determining an IEB:
+# 1. We must _only_ count the longest DEB within each candidate branch as part of its IEB score, since all DEBs except one must be re-traversed.
+# 2. The distance of the starting room to each candidate branch must be subtracted from that branch's IEB score, since every additional step taken to ensure that a candidate branch is explored last will (obviously) add to the length of the traversal.
