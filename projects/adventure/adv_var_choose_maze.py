@@ -279,9 +279,14 @@ visited_rooms = set()
 player.currentRoom = world.startingRoom
 visited_rooms.add(player.currentRoom)
 
+shortest_traversalPath_by_room = []
+
 for move in traversalPath:
     player.travel(move)
     visited_rooms.add(player.currentRoom)
+    shortest_traversalPath_by_room.append(player.currentRoom.id)
+
+print(f'\nshortest_traversalPath_by_room:\n{shortest_traversalPath_by_room}')
 
 if len(visited_rooms) == len(roomGraph):
     print(
