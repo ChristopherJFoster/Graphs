@@ -9,7 +9,7 @@ import copy
 import time
 
 ''' Choose roomGraph here '''
-roomGraph = roomGraph500
+roomGraph = roomGraph3
 ''' Choose roomGraph here '''
 
 # Load world
