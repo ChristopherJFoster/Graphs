@@ -8,6 +8,9 @@ pylint = "*"
 autopep8 = "*"
 
 [packages]
+networkx = "*"
+plotly = "*"
+matplotlib = "*"
 
 [requires]
 python_version = "3.7"
